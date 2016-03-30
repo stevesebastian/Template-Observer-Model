@@ -1,4 +1,4 @@
-function plotTemplateRespSigmaVsStats(ImgStats, targetTypeStr, simType, fpOut)
+function plotTemplateRespSigmaVsStats(ImgStats, targetTypeStr, modelFunction, params, fpOut)
 %% plotTempalteRespSigmaVsStats
 %   Plots and save the standard deviation of the tempalte response as a
 %   function of each statistic.
@@ -12,6 +12,14 @@ function plotTemplateRespSigmaVsStats(ImgStats, targetTypeStr, simType, fpOut)
 
 %% Check variables 
 
+if(nargin < 4)
+    bModel = 0;
+    modelFunction = [];
+    params = [];
+else
+    bModel = 1;
+end
+
 if(~exist('fpOut', 'var') || isempty(fpOut))
     bSave = 0;
 else
@@ -19,42 +27,39 @@ else
 end
 
 if(strcmp(targetTypeStr, 'all'))
-    binCenter = [];
-    for iTarget = 1:size(ImgStats.Settings.targetKey,2)
-        targetIndex = lib.getTargetIndexFromString(ImgStats.Settings,ImgStats.Settings.targetKey{iTarget});
-        target = ImgStats.Settings.targets(:,:,targetIndex);
-        scaleFactor = sum(target(:).*target(:)); 
-    
-        tMatch = ImgStats.tMatch(:,:,targetIndex);
-        if(strcmp(simType, 'amp'))
-            patchIndex = ImgStats.patchIndex{targetIndex};
-            binCenter = [binCenter ImgStats.Settings.binCenters.Sa(:,targetIndex)'];
-        else
-            patchIndex = ImgStats.patchIndexSs{targetIndex};
-            binCenter = [binCenter ImgStats.Settings.binCenters.Ss(:,targetIndex)'];
-        end
-        
-    
-        tSigma(:,:,:,iTarget) = model.computeTemplateResponseSigma(tMatch, patchIndex, scaleFactor);
-    end
-else
-    targetIndex = lib.getTargetIndexFromString(ImgStats.Settings,targetTypeStr);
-    target = ImgStats.Settings.targets(:,:,targetIndex);
-    scaleFactor = sum(target(:).*target(:)); 
-    
-    
-    tMatch = ImgStats.tMatch(:,:,targetIndex);
-    
-    if(strcmp(simType, 'amp'))
-        patchIndex = ImgStats.patchIndex{targetIndex};
-        binCenter = ImgStats.Settings.binCenters.Sa(:,targetIndex)';
-    else
-        patchIndex = ImgStats.patchIndexSs{targetIndex};
-        binCenter = ImgStats.Settings.binCenters.Ss(:,targetIndex)';
-    end
-    
-    tSigma = model.computeTemplateResponseSigma(tMatch, patchIndex, scaleFactor);
+    targetTypeStr = ImgStats.Settings.targetKey;
+end
 
+bScale = 1;
+%% Get template response sigmas
+
+targetIndex = lib.getTargetIndexFromString(ImgStats.Settings,targetTypeStr);
+
+nTargets = size(targetIndex,2);
+
+tSigma = model.computeTemplateResponseSigma(ImgStats, targetTypeStr, bScale);
+
+%% Get bin values
+binCenterStruct = ImgStats.Settings.binCenters;
+nBins = 10;
+
+binCenter = [];
+
+for iTarget = 1:size(ImgStats.Settings.targetKey,2)
+    for iLum = 1:nBins
+        for iCon  = 1:nBins
+            for iSim = 1:nBins
+                Lin(iLum,iCon,iSim,iTarget) = binCenterStruct.L(iLum);
+                Cin(iLum,iCon,iSim,iTarget) = binCenterStruct.C(iCon);
+                Sin(iLum,iCon,iSim,iTarget) = binCenterStruct.Sa(iSim,iTarget);
+            end
+        end
+    end
+    binCenter = [binCenter squeeze(Sin(1,1,1:10,iTarget))'];
+end
+
+if(bModel) 
+    sigmaModel = modelFunction(params,Lin,Cin,Sin);
 end
 
 %% Plot
@@ -74,10 +79,14 @@ for lItr = 1:10
             color = 7;
         end
         
-        if(strcmp(targetTypeStr, 'all'))
+        if(1)
                 tSigmaCurr = [];
+                tSigmaModel = [];
                 for iTarget = 1:size(ImgStats.Settings.targetKey,2)
                     tSigmaCurr = [tSigmaCurr squeeze(tSigma(lItr, cItr, :, iTarget))'];
+                    if(bModel)
+                        tSigmaModel = [tSigmaModel squeeze(sigmaModel(lItr,cItr,:,iTarget))'];
+                    end      
                 end
         else
             tSigmaCurr = squeeze(tSigma(lItr, cItr, :))';
@@ -91,12 +100,16 @@ for lItr = 1:10
         t.FontWeight = 'bold';
         gcaYLim = get(gca, 'ylim');
         
-        coeffs = polyfit(binCenter, tSigmaCurr, 1);
-        % Get fitted values
-        fittedX = linspace(min(binCenter), max(binCenter), 200);
-        fittedY = polyval(coeffs, fittedX);
-        % Plot the fitted line
-        plot(fittedX, fittedY, '-', 'LineWidth', 2, 'Color', c(color,:));
+        if(bModel)
+            plot(binCenter, tSigmaModel, '-', 'LineWidth', 2, 'MarkerSize', 9, 'MarkerFaceColor', c(color,:), 'Color', c(color,:));
+        else
+            coeffs = polyfit(binCenter, tSigmaCurr, 1);
+            % Get fitted values
+            fittedX = linspace(min(binCenter), max(binCenter), 200);
+            fittedY = polyval(coeffs, fittedX);
+            % Plot the fitted line
+            plot(fittedX, fittedY, '-', 'LineWidth', 2, 'Color', c(color,:));
+        end
         
     end
 	ylim([gcaYLim(2)./-30, gcaYLim(2)]);
