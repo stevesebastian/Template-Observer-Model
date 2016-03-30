@@ -1,12 +1,14 @@
-function statImg = getStatImg(ImgStats, imgIndex, statTypeStr, targetTypeIndex)
+function [statImg, hwSize] = getStatImg(ImgStats, imgIndex, statTypeStr, targetTypeIndex)
+
+hwSize = [326, 182];
 
 switch statTypeStr
     case 'L'
-        statImg = reshape(ImgStats.L(:,imgIndex), [326 182]);
+        statImg = reshape(ImgStats.L(:,imgIndex), hwSize);
     case 'C'
-        statImg = reshape(ImgStats.C(:,imgIndex), [326 182]);
+        statImg = reshape(ImgStats.C(:,imgIndex), hwSize);
     case 'Sa'
-        statImg = reshape(ImgStats.Sa(:,imgIndex,targetTypeIndex), [326 182]);
+        statImg = reshape(ImgStats.Sa(:,imgIndex,targetTypeIndex), hwSize);
     case 'Ss'
-        statImg = reshape(ImgStats.Sa(:,imgIndex,targetTypeIndex), [326 182]);
+        statImg = reshape(ImgStats.Sa(:,imgIndex,targetTypeIndex), hwSize);
 end
