@@ -1,4 +1,4 @@
-function paramsOut = fitTemplateSigmaModel(ImgStats, x0, modelFunction, targetTypeStr, bScale, bPlot)
+function paramsOut = fitTemplateSigmaModel(ImgStats, x0, modelFunction, targetTypeStr, errorTypeStr, bScale, bPlot)
 
 %% Check input
 
@@ -43,7 +43,7 @@ end
 %% Fit Model
 % x0 = [230.3170*scaleFactor(1), 230.3170*scaleFactor(2), 230.3170*scaleFactor(3), 1  1 1];
 options = optimset('Display','iter', 'TolX', 1.e-14, 'TolFun', 1.e-14, 'MaxFunEvals', 3000, 'MaxIter', 5000);
-f = @(x)model.objectiveFunction(x,Lin,Cin,Sin,tSigma,modelFunction);
+f = @(x)model.objectiveFunction(x,Lin,Cin,Sin,tSigma,modelFunction,errorTypeStr);
 
 [paramsOut,fval] = fminsearch(f, x0, options);
 

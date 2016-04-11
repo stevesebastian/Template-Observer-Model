@@ -10,5 +10,5 @@ switch statTypeStr
     case 'Sa'
         statImg = reshape(ImgStats.Sa(:,imgIndex,targetTypeIndex), hwSize);
     case 'Ss'
-        statImg = reshape(ImgStats.Sa(:,imgIndex,targetTypeIndex), hwSize);
+        statImg = reshape(ImgStats.Ss(:,imgIndex,targetTypeIndex), hwSize);
 end
