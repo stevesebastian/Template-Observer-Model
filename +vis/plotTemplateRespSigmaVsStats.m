@@ -45,7 +45,7 @@ nBins = 10;
 
 binCenter = [];
 
-for iTarget = 1:size(ImgStats.Settings.targetKey,2)
+for iTarget = targetIndex
     for iLum = 1:nBins
         for iCon  = 1:nBins
             for iSim = 1:nBins
@@ -79,7 +79,7 @@ for lItr = 1:10
             color = 7;
         end
         
-        if(1)
+        if(strcmp(targetTypeStr, 'all'))
                 tSigmaCurr = [];
                 tSigmaModel = [];
                 for iTarget = 1:size(ImgStats.Settings.targetKey,2)

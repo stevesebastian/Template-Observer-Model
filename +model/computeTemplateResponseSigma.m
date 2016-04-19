@@ -24,8 +24,8 @@ if(nTargets > 1)
     tSigma = zeros([size(patchIndex{1}), nTargets]);
     smallSample = zeros([size(patchIndex{1}), nTargets]);
 else
-    tSigma = zeros(size(patchIndex));
-    smallSample = zeros(size(patchIndex));
+    tSigma = zeros(size(patchIndex{1}));
+    smallSample = zeros(size(patchIndex{1}));
 end
 
 for iTar = 1:nTargets
