@@ -78,7 +78,7 @@ for lItr = 1:10
         if(color == 0)
             color = 7;
         end
-        
+   
         if(strcmp(targetTypeStr, 'all'))
                 tSigmaCurr = [];
                 tSigmaModel = [];
