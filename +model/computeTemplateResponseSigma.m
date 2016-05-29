@@ -1,4 +1,4 @@
-function [tSigma, smallSample] = computeTemplateResponseSigma(ImgStats, targetTypeStr, bScale)
+function [tSigma, tMu, smallSample] = computeTemplateResponseSigma(ImgStats, targetTypeStr, bScale)
 
 targetIndex = lib.getTargetIndexFromString(ImgStats.Settings,targetTypeStr);
 
@@ -22,9 +22,11 @@ end
 
 if(nTargets > 1)
     tSigma = zeros([size(patchIndex{1}), nTargets]);
+    tMu = zeros([size(patchIndex{1}), nTargets]);
     smallSample = zeros([size(patchIndex{1}), nTargets]);
 else
     tSigma = zeros(size(patchIndex{1}));
+    tMu = zeros(size(patchIndex{1}));
     smallSample = zeros(size(patchIndex{1}));
 end
 
@@ -41,6 +43,8 @@ for iTar = 1:nTargets
         for iCon = 1:size(tSigma,2)
             for iSim = 1:size(tSigma,1)
                 tSigma(iLum, iCon, iSim,iTar) = std(tMatchCurr(patchIndexCurr{iLum, iCon, iSim}))./scaleFactor(iTar);
+                tMu(iLum, iCon, iSim,iTar) = mean(tMatchCurr(patchIndexCurr{iLum, iCon, iSim}))./scaleFactor(iTar);
+
                 if(size(patchIndexCurr{iLum, iCon, iSim} < 300))
                     smallSample(iLum, iCon, iSim,iTar) = 1;
                 end
